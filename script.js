@@ -1,4 +1,4 @@
-// Store menu items data
+// Store menu items data with proper categories
 const menuItems = [
   {
     id: 1,
@@ -6,7 +6,7 @@ const menuItems = [
     description:
       "Premium beef patty with fresh lettuce, tomato, onion, pickles, and our secret signature sauce.",
     price: 9.99,
-    category: "burgers",
+    category: "beef",
     image:
       "https://cdn.pixabay.com/photo/2023/09/25/22/08/ai-generated-8276129_1280.jpg",
     tags: ["Bestseller"],
@@ -17,7 +17,7 @@ const menuItems = [
     description:
       "Two juicy beef patties with double cheddar cheese, caramelized onions, and special sauce.",
     price: 12.99,
-    category: "burgers",
+    category: "beef",
     image:
       "https://cdn.pixabay.com/photo/2022/08/29/17/44/burger-7419420_1280.jpg",
     tags: ["Popular"],
@@ -28,7 +28,7 @@ const menuItems = [
     description:
       "Angus beef patty topped with crispy bacon, fresh avocado, lettuce, and garlic aioli.",
     price: 13.99,
-    category: "burgers",
+    category: "beef",
     image:
       "https://cdn.pixabay.com/photo/2014/10/19/20/59/hamburger-494706_1280.jpg",
     tags: ["New"],
@@ -39,7 +39,7 @@ const menuItems = [
     description:
       "Beef patty with pepper jack cheese, fresh jalapeños, spicy mayo, and crispy onion strings.",
     price: 11.99,
-    category: "burgers",
+    category: "beef",
     image:
       "https://cdn.pixabay.com/photo/2020/09/14/16/23/burger-5571385_1280.jpg",
     tags: ["Spicy"],
@@ -50,7 +50,7 @@ const menuItems = [
     description:
       "Beef patty topped with sautéed mushrooms, melted Swiss cheese, and truffle aioli.",
     price: 12.49,
-    category: "burgers",
+    category: "beef",
     image:
       "https://cdn.pixabay.com/photo/2021/12/09/20/46/burger-6859072_1280.jpg",
     tags: ["Classic"],
@@ -61,7 +61,7 @@ const menuItems = [
     description:
       "Plant-based patty with fresh avocado, grilled peppers, lettuce, and vegan garlic aioli.",
     price: 10.99,
-    category: "burgers",
+    category: "veggie",
     image:
       "https://cdn.pixabay.com/photo/2021/03/19/21/52/burger-6108495_1280.jpg",
     tags: ["Vegetarian"],
@@ -89,13 +89,45 @@ document.addEventListener("DOMContentLoaded", () => {
 
   searchInput.addEventListener("input", searchItems);
 
+  // Fixed filter functionality
   filterChips.forEach((chip) => {
     chip.addEventListener("click", () => {
       filterChips.forEach((c) => c.classList.remove("active"));
       chip.classList.add("active");
+      
+      // Get the filter category from the chip text
+      const filterCategory = chip.textContent.toLowerCase();
+      filterItems(filterCategory);
     });
   });
 });
+
+// New function to filter items by category
+function filterItems(category) {
+  const menuItemElements = document.querySelectorAll(".menu-item");
+  
+  menuItemElements.forEach((itemElement) => {
+    const itemId = parseInt(itemElement.dataset.id);
+    const menuItem = menuItems.find(item => item.id === itemId);
+    
+    if (category === "all burgers") {
+      // Show all items
+      itemElement.style.display = "block";
+    } else if (category === "beef" && menuItem.category === "beef") {
+      itemElement.style.display = "block";
+    } else if (category === "chicken" && menuItem.category === "chicken") {
+      itemElement.style.display = "block";
+    } else if (category === "veggie" && menuItem.category === "veggie") {
+      itemElement.style.display = "block";
+    } else if (category === "special" && menuItem.tags.some(tag => tag.toLowerCase().includes("special"))) {
+      itemElement.style.display = "block";
+    } else if (category === "bestsellers" && menuItem.tags.some(tag => tag.toLowerCase().includes("bestseller") || tag.toLowerCase().includes("popular"))) {
+      itemElement.style.display = "block";
+    } else {
+      itemElement.style.display = "none";
+    }
+  });
+}
 
 // Search items
 function searchItems() {
@@ -147,6 +179,11 @@ function removeFromCart(itemId) {
     // Update the cart UI
     updateCart();
   }
+}
+
+// Get total number of items in cart
+function getTotalItems() {
+  return cart.reduce((total, item) => total + item.quantity, 0);
 }
 
 // Update cart UI
@@ -204,6 +241,29 @@ function updateCart() {
 
   // Update totals
   updateTotals();
+  
+  // Update cart icon with item count
+  updateCartIcon();
+}
+
+// Update cart icon with item count
+function updateCartIcon() {
+  const cartIcon = document.querySelector(".cart-icon");
+  const totalItems = getTotalItems();
+  
+  // Remove any existing count badge
+  const existingBadge = cartIcon.querySelector(".cart-count");
+  if (existingBadge) {
+    existingBadge.remove();
+  }
+  
+  // Add count badge if there are items
+  if (totalItems > 0) {
+    const countBadge = document.createElement("span");
+    countBadge.className = "cart-count";
+    countBadge.textContent = totalItems;
+    cartIcon.appendChild(countBadge);
+  }
 }
 
 // Update the cart totals
